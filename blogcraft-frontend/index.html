@@ -1,0 +1,1535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlogCraft Pro - Advanced Blogging Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.0.0/fonts/remixicon.css" rel="stylesheet">
+    <style>
+        .editor-content {
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .editor-content:focus {
+            outline: none;
+        }
+        .blog-post {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .blog-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .active-format {
+            background-color: #3b82f6 !important;
+            color: white !important;
+        }
+        .sidebar-item {
+            transition: all 0.3s ease;
+        }
+        .sidebar-item:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-left: 4px solid #3b82f6;
+        }
+        .sidebar-item.active {
+            background-color: rgba(59, 130, 246, 0.15);
+            border-left: 4px solid #3b82f6;
+            color: #3b82f6;
+        }
+        .sidebar {
+            transition: transform 0.3s ease;
+        }
+        @media (max-width: 768px) {
+            .sidebar.hidden-mobile {
+                transform: translateX(-100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="fixed inset-0 bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4">
+            <div class="text-center mb-8">
+                <i class="ri-article-line text-5xl text-blue-600 mb-4"></i>
+                <h1 class="text-3xl font-bold text-gray-800">BlogCraft Pro</h1>
+                <p class="text-gray-600 mt-2">Advanced Blogging Platform</p>
+            </div>
+            
+            <div id="loginForm">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Welcome Back</h2>
+                <form onsubmit="handleLogin(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="loginEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your email">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="loginPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                        <i class="ri-login-box-line mr-2"></i>Sign In
+                    </button>
+                </form>
+                <p class="text-center mt-4 text-gray-600">
+                    Don't have an account? 
+                    <button onclick="showRegister()" class="text-blue-600 hover:underline font-medium">Sign Up</button>
+                </p>
+            </div>
+            
+            <div id="registerForm" class="hidden">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Create Account</h2>
+                <form onsubmit="handleRegister(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                        <input type="text" id="registerName" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your full name">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                        <input type="email" id="registerEmail" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Enter your email">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Password</label>
+                        <input type="password" id="registerPassword" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Create a password">
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                        <i class="ri-user-add-line mr-2"></i>Create Account
+                    </button>
+                </form>
+                <p class="text-center mt-4 text-gray-600">
+                    Already have an account? 
+                    <button onclick="showLogin()" class="text-blue-600 hover:underline font-medium">Sign In</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="mainApp" class="hidden">
+        <!-- Top Navigation Bar -->
+        <nav class="bg-white shadow-lg border-b-4 border-blue-500 fixed top-0 left-0 right-0 z-40">
+            <div class="px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <div class="flex items-center">
+                        <button onclick="toggleSidebar()" class="md:hidden mr-3 text-gray-600 hover:text-gray-800">
+                            <i class="ri-menu-line text-xl"></i>
+                        </button>
+                        <i class="ri-article-line text-3xl text-blue-600 mr-3"></i>
+                        <h1 class="text-2xl font-bold text-gray-800">BlogCraft Pro</h1>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center overflow-hidden" id="navProfilePhoto">
+                                <i class="ri-user-line text-white text-sm" id="navProfileIcon"></i>
+                                <img id="navProfileImg" class="w-full h-full object-cover hidden" alt="Profile">
+                            </div>
+                            <span class="text-gray-700 font-medium" id="userNameDisplay">John Doe</span>
+                        </div>
+                        <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
+                            <i class="ri-logout-box-line mr-2"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Sidebar -->
+        <div id="sidebar" class="sidebar fixed left-0 top-16 h-full w-64 bg-white shadow-lg z-30 overflow-y-auto">
+            <div class="p-6">
+                <div class="space-y-2">
+                    <button onclick="showSection('dashboard')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3 active">
+                        <i class="ri-home-line text-lg"></i>
+                        <span class="font-medium">Dashboard</span>
+                    </button>
+                    
+                    <button onclick="showSection('editor')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i class="ri-add-line text-lg"></i>
+                        <span class="font-medium">New Post</span>
+                    </button>
+                    
+                    <button onclick="showSection('myPosts')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i class="ri-file-text-line text-lg"></i>
+                        <span class="font-medium">My Posts</span>
+                    </button>
+                    
+                    <button onclick="showSection('analytics')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i class="ri-bar-chart-line text-lg"></i>
+                        <span class="font-medium">Analytics</span>
+                    </button>
+                    
+                    <button onclick="showSection('profile')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i class="ri-user-line text-lg"></i>
+                        <span class="font-medium">Profile</span>
+                    </button>
+                    
+                    <button onclick="showSection('settings')" class="sidebar-item w-full text-left px-4 py-3 rounded-lg flex items-center space-x-3">
+                        <i class="ri-settings-line text-lg"></i>
+                        <span class="font-medium">Settings</span>
+                    </button>
+                </div>
+                
+                <div class="mt-8 pt-6 border-t border-gray-200">
+                    <div class="bg-blue-50 rounded-lg p-4">
+                        <h4 class="font-medium text-blue-800 mb-2">Quick Stats</h4>
+                        <div class="space-y-1 text-sm text-blue-700">
+                            <div class="flex justify-between">
+                                <span>Posts:</span>
+                                <span id="sidebarPosts">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Views:</span>
+                                <span id="sidebarViews">0</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Likes:</span>
+                                <span id="sidebarLikes">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="ml-0 md:ml-64 pt-16 min-h-screen">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section p-6">
+                <div class="mb-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome back, <span id="dashboardUserName">John</span>!</h2>
+                    <p class="text-gray-600">Here's what's happening with your blog today.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500">
+                        <div class="flex items-center">
+                            <i class="ri-file-text-line text-3xl text-blue-600 mr-4"></i>
+                            <div>
+                                <p class="text-gray-600">Total Posts</p>
+                                <p class="text-2xl font-bold text-gray-800" id="totalPosts">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-green-500">
+                        <div class="flex items-center">
+                            <i class="ri-eye-line text-3xl text-green-600 mr-4"></i>
+                            <div>
+                                <p class="text-gray-600">Total Views</p>
+                                <p class="text-2xl font-bold text-gray-800" id="totalViews">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500">
+                        <div class="flex items-center">
+                            <i class="ri-heart-line text-3xl text-purple-600 mr-4"></i>
+                            <div>
+                                <p class="text-gray-600">Total Likes</p>
+                                <p class="text-2xl font-bold text-gray-800" id="totalLikes">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+                        <div class="flex items-center">
+                            <i class="ri-chat-3-line text-3xl text-orange-600 mr-4"></i>
+                            <div>
+                                <p class="text-gray-600">Comments</p>
+                                <p class="text-2xl font-bold text-gray-800" id="totalComments">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Posts -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-800">Recent Posts</h3>
+                        <button onclick="showSection('myPosts')" class="text-blue-600 hover:text-blue-700 font-medium">
+                            View All <i class="ri-arrow-right-line ml-1"></i>
+                        </button>
+                    </div>
+                    <div id="recentPostsList">
+                        <!-- Recent posts will be inserted here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Posts Section -->
+            <div id="myPosts" class="section hidden p-6">
+                <div class="mb-6 flex justify-between items-center">
+                    <h2 class="text-3xl font-bold text-gray-800">My Posts</h2>
+                    <button onclick="showSection('editor')" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                        <i class="ri-add-line mr-2"></i>New Post
+                    </button>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                        <div class="flex space-x-4">
+                            <select id="filterStatus" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="all">All Posts</option>
+                                <option value="published">Published</option>
+                                <option value="draft">Drafts</option>
+                                <option value="scheduled">Scheduled</option>
+                            </select>
+                            <select id="sortMyPosts" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="newest">Newest First</option>
+                                <option value="oldest">Oldest First</option>
+                                <option value="popular">Most Popular</option>
+                            </select>
+                        </div>
+                        <input type="text" id="searchMyPosts" placeholder="Search your posts..." 
+                               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 w-full md:w-64">
+                    </div>
+                </div>
+                
+                <div id="myPostsGrid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <!-- Posts will be dynamically inserted here -->
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="section hidden p-6">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6">Analytics Dashboard</h2>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Performance Overview</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Average Views per Post</span>
+                                <span class="font-bold text-blue-600" id="avgViews">0</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Engagement Rate</span>
+                                <span class="font-bold text-green-600" id="engagementRate">0%</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-600">Most Popular Category</span>
+                                <span class="font-bold text-purple-600" id="popularCategory">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-800 mb-4">Top Performing Posts</h3>
+                        <div id="topPostsList" class="space-y-3">
+                            <!-- Top posts will be inserted here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post Editor Section -->
+            <div id="editor" class="section hidden p-6">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">
+                        <span id="editorTitle">Create New Post</span>
+                    </h2>
+                    
+                    <!-- Post Title -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Post Title</label>
+                        <input type="text" id="postTitle" placeholder="Enter your post title..." 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-lg">
+                    </div>
+
+                    <!-- Category and Tags -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                            <select id="postCategory" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="technology">Technology</option>
+                                <option value="lifestyle">Lifestyle</option>
+                                <option value="travel">Travel</option>
+                                <option value="food">Food</option>
+                                <option value="business">Business</option>
+                                <option value="health">Health</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Tags</label>
+                            <input type="text" id="postTags" placeholder="Enter tags separated by commas..." 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Rich Text Editor Toolbar -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Content</label>
+                        <div class="border border-gray-300 rounded-lg overflow-hidden">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-300 flex flex-wrap gap-2">
+                                <!-- Formatting Buttons -->
+                                <button onclick="formatText('bold')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm font-bold">
+                                    <i class="ri-bold"></i>
+                                </button>
+                                <button onclick="formatText('italic')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm italic">
+                                    <i class="ri-italic"></i>
+                                </button>
+                                <button onclick="formatText('underline')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm underline">
+                                    <i class="ri-underline"></i>
+                                </button>
+                                
+                                <div class="w-px bg-gray-400 mx-2"></div>
+                                
+                                <!-- Alignment Buttons -->
+                                <button onclick="formatText('justifyLeft')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm">
+                                    <i class="ri-align-left"></i>
+                                </button>
+                                <button onclick="formatText('justifyCenter')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm">
+                                    <i class="ri-align-center"></i>
+                                </button>
+                                <button onclick="formatText('justifyRight')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm">
+                                    <i class="ri-align-right"></i>
+                                </button>
+                                
+                                <div class="w-px bg-gray-400 mx-2"></div>
+                                
+                                <!-- List Buttons -->
+                                <button onclick="formatText('insertUnorderedList')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm">
+                                    <i class="ri-list-unordered"></i>
+                                </button>
+                                <button onclick="formatText('insertOrderedList')" class="format-btn px-3 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm">
+                                    <i class="ri-list-ordered"></i>
+                                </button>
+                                
+                                <div class="w-px bg-gray-400 mx-2"></div>
+                                
+                                <!-- Font Size -->
+                                <select onchange="changeFontSize(this.value)" class="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm">
+                                    <option value="1">Small</option>
+                                    <option value="3" selected>Normal</option>
+                                    <option value="5">Large</option>
+                                    <option value="7">Extra Large</option>
+                                </select>
+                                
+                                <!-- Image Upload -->
+                                <button onclick="document.getElementById('imageUpload').click()" class="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">
+                                    <i class="ri-image-line mr-1"></i>Image
+                                </button>
+                                <input type="file" id="imageUpload" accept="image/*" style="display: none;" onchange="insertImage(this)">
+                                
+                                <!-- Link -->
+                                <button onclick="insertLink()" class="px-3 py-1 bg-green-500 hover:bg-green-600 text-white rounded text-sm">
+                                    <i class="ri-link mr-1"></i>Link
+                                </button>
+                            </div>
+                            
+                            <!-- Editor Content Area -->
+                            <div id="editorContent" contenteditable="true" 
+                                 class="editor-content p-4 min-h-[300px] focus:outline-none"
+                                 placeholder="Start writing your blog post...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Post Settings -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Post Status</label>
+                            <select id="postStatus" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                <option value="draft">Draft</option>
+                                <option value="published">Published</option>
+                                <option value="scheduled">Scheduled</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Featured Image URL (Optional)</label>
+                            <input type="url" id="featuredImage" placeholder="https://example.com/image.jpg" 
+                                   class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex justify-between items-center">
+                        <button onclick="cancelEdit()" class="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                            <i class="ri-close-line mr-2"></i>Cancel
+                        </button>
+                        <div class="space-x-4">
+                            <button onclick="saveDraft()" class="px-6 py-3 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                                <i class="ri-save-line mr-2"></i>Save Draft
+                            </button>
+                            <button onclick="previewPost()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="ri-eye-line mr-2"></i>Preview
+                            </button>
+                            <button onclick="publishPost()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                <i class="ri-send-plane-line mr-2"></i>Publish Post
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Section -->
+            <div id="profile" class="section hidden p-6">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Profile Settings</h2>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <!-- Profile Picture and Basic Info -->
+                        <div class="lg:col-span-1">
+                            <div class="text-center mb-6">
+                                <div class="w-32 h-32 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden" id="profilePhotoContainer">
+                                    <i class="ri-user-line text-4xl text-white" id="profilePhotoIcon"></i>
+                                    <img id="profilePhotoImg" class="w-full h-full object-cover hidden" alt="Profile Photo">
+                                </div>
+                                <button onclick="document.getElementById('profilePhotoUpload').click()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <i class="ri-camera-line mr-2"></i>Change Photo
+                                </button>
+                                <input type="file" id="profilePhotoUpload" accept="image/*" style="display: none;" onchange="handleProfilePhotoUpload(this)">
+                            </div>
+                            
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <h4 class="font-medium text-gray-800 mb-3">Account Statistics</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Member Since:</span>
+                                        <span class="font-medium" id="memberSince">Jan 2024</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Posts:</span>
+                                        <span class="font-medium" id="profileTotalPosts">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Views:</span>
+                                        <span class="font-medium" id="profileTotalViews">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Profile Form -->
+                        <div class="lg:col-span-2">
+                            <form onsubmit="saveProfile(event)">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                                        <input type="text" id="profileName" required
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <input type="email" id="profileEmail" required
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                                    <textarea id="profileBio" rows="4" placeholder="Tell us about yourself..." 
+                                              class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"></textarea>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Website</label>
+                                        <input type="url" id="profileWebsite" placeholder="https://yourwebsite.com" 
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                                        <input type="text" id="profileLocation" placeholder="City, Country" 
+                                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Social Links</label>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center space-x-3">
+                                            <i class="ri-twitter-line text-blue-400 w-5"></i>
+                                            <input type="url" id="profileTwitter" placeholder="Twitter URL" 
+                                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <i class="ri-linkedin-line text-blue-600 w-5"></i>
+                                            <input type="url" id="profileLinkedin" placeholder="LinkedIn URL" 
+                                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div class="flex items-center space-x-3">
+                                            <i class="ri-github-line text-gray-800 w-5"></i>
+                                            <input type="url" id="profileGithub" placeholder="GitHub URL" 
+                                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex justify-end">
+                                    <button type="submit" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                        <i class="ri-save-line mr-2"></i>Save Profile
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="section hidden p-6">
+                <div class="bg-white rounded-xl shadow-lg p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-6">Settings</h2>
+                    
+                    <div class="space-y-8">
+                        <!-- Account Settings -->
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Account Settings</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Email Notifications</h4>
+                                        <p class="text-sm text-gray-600">Receive email notifications for new comments and likes</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                                
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Auto-save Drafts</h4>
+                                        <p class="text-sm text-gray-600">Automatically save your work while writing</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Privacy Settings -->
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 mb-4">Privacy Settings</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                    <div>
+                                        <h4 class="font-medium text-gray-800">Public Profile</h4>
+                                        <p class="text-sm text-gray-600">Make your profile visible to other users</p>
+                                    </div>
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox" class="sr-only peer" checked>
+                                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Danger Zone -->
+                        <div>
+                            <h3 class="text-xl font-bold text-red-600 mb-4">Danger Zone</h3>
+                            <div class="border border-red-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 class="font-medium text-red-800">Delete Account</h4>
+                                        <p class="text-sm text-red-600">Permanently delete your account and all data</p>
+                                    </div>
+                                    <button onclick="confirmDeleteAccount()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                        Delete Account
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Preview Modal -->
+    <div id="previewModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-800">Post Preview</h3>
+                <button onclick="closePreview()" class="text-gray-500 hover:text-gray-700">
+                    <i class="ri-close-line text-xl"></i>
+                </button>
+            </div>
+            <div id="previewContent" class="p-6">
+                <!-- Preview content will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let currentUser = null;
+        let blogPosts = [];
+        let currentEditingPost = null;
+        let sidebarVisible = true;
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            
+            // Add event listeners for search and filter
+            document.getElementById('searchMyPosts')?.addEventListener('input', function() {
+                renderMyPosts();
+            });
+            
+            document.getElementById('filterStatus')?.addEventListener('change', function() {
+                renderMyPosts();
+            });
+            
+            document.getElementById('sortMyPosts')?.addEventListener('change', function() {
+                renderMyPosts();
+            });
+        });
+
+        // Authentication Functions
+        function checkAuthStatus() {
+            const user = localStorage.getItem('currentUser');
+            if (user) {
+                currentUser = JSON.parse(user);
+                showMainApp();
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        function showLoginScreen() {
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            
+            // Load user data
+            loadUserData();
+            loadProfilePhoto();
+            updateDashboardStats();
+            renderRecentPosts();
+            updateSidebarStats();
+        }
+
+        function showLogin() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        // Replace your handleLogin function with:
+async function handleLogin(event) {
+  event.preventDefault();
+  
+  const email = document.getElementById('loginEmail').value;
+  const password = document.getElementById('loginPassword').value;
+  
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      currentUser = data;
+      localStorage.setItem('currentUser', JSON.stringify(data));
+      localStorage.setItem('token', data.token);
+      showMainApp();
+      showNotification('Welcome back!', 'success');
+    } else {
+      showNotification(data.message, 'error');
+    }
+  } catch (error) {
+    showNotification('Login failed. Please try again.', 'error');
+  }
+}
+
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            
+            // Check if user already exists
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            if (users.find(u => u.email === email)) {
+                showNotification('User with this email already exists', 'error');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password,
+                bio: '',
+                website: '',
+                location: '',
+                twitter: '',
+                linkedin: '',
+                github: '',
+                profilePhoto: '',
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            currentUser = newUser;
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            
+            showMainApp();
+            showNotification('Account created successfully!', 'success');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                currentUser = null;
+                showLoginScreen();
+                showNotification('Logged out successfully', 'success');
+            }
+        }
+
+        // User Data Management
+        function loadUserData() {
+            if (!currentUser) return;
+            
+            // Update UI with user info
+            document.getElementById('userNameDisplay').textContent = currentUser.name;
+            document.getElementById('dashboardUserName').textContent = currentUser.name.split(' ')[0];
+            
+            // Load user's blog posts
+            blogPosts = JSON.parse(localStorage.getItem(`posts_${currentUser.id}`) || '[]');
+            
+            // Load profile data
+            document.getElementById('profileName').value = currentUser.name;
+            document.getElementById('profileEmail').value = currentUser.email;
+            document.getElementById('profileBio').value = currentUser.bio || '';
+            document.getElementById('profileWebsite').value = currentUser.website || '';
+            document.getElementById('profileLocation').value = currentUser.location || '';
+            document.getElementById('profileTwitter').value = currentUser.twitter || '';
+            document.getElementById('profileLinkedin').value = currentUser.linkedin || '';
+            document.getElementById('profileGithub').value = currentUser.github || '';
+            
+            // Update member since date
+            document.getElementById('memberSince').textContent = new Date(currentUser.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+        }
+
+        function saveUserData() {
+            if (!currentUser) return;
+            localStorage.setItem(`posts_${currentUser.id}`, JSON.stringify(blogPosts));
+        }
+
+        // Profile Photo Functions
+        function handleProfilePhotoUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Check file size (limit to 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification('Image size should be less than 5MB', 'error');
+                    return;
+                }
+                
+                // Check file type
+                if (!file.type.startsWith('image/')) {
+                    showNotification('Please select a valid image file', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoData = e.target.result;
+                    
+                    // Update profile photo in current user
+                    currentUser.profilePhoto = photoData;
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    // Update in users array
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const userIndex = users.findIndex(u => u.id === currentUser.id);
+                    if (userIndex !== -1) {
+                        users[userIndex].profilePhoto = photoData;
+                        localStorage.setItem('users', JSON.stringify(users));
+                    }
+                    
+                    // Update UI
+                    updateProfilePhotoUI(photoData);
+                    showNotification('Profile photo updated successfully!', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function updateProfilePhotoUI(photoData) {
+            // Update main profile photo
+            const profileImg = document.getElementById('profilePhotoImg');
+            const profileIcon = document.getElementById('profilePhotoIcon');
+            
+            if (profileImg && profileIcon) {
+                if (photoData) {
+                    profileImg.src = photoData;
+                    profileImg.classList.remove('hidden');
+                    profileIcon.classList.add('hidden');
+                } else {
+                    profileImg.classList.add('hidden');
+                    profileIcon.classList.remove('hidden');
+                }
+            }
+            
+            // Update navigation profile photo
+            const navImg = document.getElementById('navProfileImg');
+            const navIcon = document.getElementById('navProfileIcon');
+            
+            if (navImg && navIcon) {
+                if (photoData) {
+                    navImg.src = photoData;
+                    navImg.classList.remove('hidden');
+                    navIcon.classList.add('hidden');
+                } else {
+                    navImg.classList.add('hidden');
+                    navIcon.classList.remove('hidden');
+                }
+            }
+        }
+        
+        function loadProfilePhoto() {
+            if (currentUser && currentUser.profilePhoto) {
+                updateProfilePhotoUI(currentUser.profilePhoto);
+            }
+        }
+
+        // Navigation Functions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebarVisible = !sidebarVisible;
+            
+            if (sidebarVisible) {
+                sidebar.classList.remove('hidden-mobile');
+            } else {
+                sidebar.classList.add('hidden-mobile');
+            }
+        }
+
+        function showSection(sectionName) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName).classList.remove('hidden');
+            
+            // Update sidebar active state
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load section-specific data
+            switch(sectionName) {
+                case 'dashboard':
+                    updateDashboardStats();
+                    renderRecentPosts();
+                    break;
+                case 'myPosts':
+                    renderMyPosts();
+                    break;
+                case 'analytics':
+                    updateAnalytics();
+                    break;
+                case 'editor':
+                    // Clear editor if not editing
+                    if (!currentEditingPost) {
+                        clearEditor();
+                    }
+                    break;
+            }
+            
+            // Hide sidebar on mobile after selection
+            if (window.innerWidth < 768) {
+                toggleSidebar();
+            }
+        }
+
+        // Dashboard Functions
+        function updateDashboardStats() {
+            const publishedPosts = blogPosts.filter(post => post.status === 'published');
+            const totalViews = publishedPosts.reduce((sum, post) => sum + (post.views || 0), 0);
+            const totalLikes = publishedPosts.reduce((sum, post) => sum + (post.likes || 0), 0);
+            const totalComments = publishedPosts.reduce((sum, post) => sum + (post.comments || 0), 0);
+            
+            document.getElementById('totalPosts').textContent = publishedPosts.length;
+            document.getElementById('totalViews').textContent = totalViews.toLocaleString();
+            document.getElementById('totalLikes').textContent = totalLikes.toLocaleString();
+            document.getElementById('totalComments').textContent = totalComments.toLocaleString();
+            
+            // Update profile stats
+            document.getElementById('profileTotalPosts').textContent = publishedPosts.length;
+            document.getElementById('profileTotalViews').textContent = totalViews.toLocaleString();
+        }
+
+        function updateSidebarStats() {
+            const publishedPosts = blogPosts.filter(post => post.status === 'published');
+            const totalViews = publishedPosts.reduce((sum, post) => sum + (post.views || 0), 0);
+            const totalLikes = publishedPosts.reduce((sum, post) => sum + (post.likes || 0), 0);
+            
+            document.getElementById('sidebarPosts').textContent = publishedPosts.length;
+            document.getElementById('sidebarViews').textContent = totalViews.toLocaleString();
+            document.getElementById('sidebarLikes').textContent = totalLikes.toLocaleString();
+        }
+
+        function renderRecentPosts() {
+            const recentPosts = blogPosts.slice(0, 5);
+            const container = document.getElementById('recentPostsList');
+            
+            if (recentPosts.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="ri-file-text-line text-4xl text-gray-300 mb-3"></i>
+                        <p class="text-gray-500">No posts yet. Create your first post!</p>
+                        <button onclick="showSection('editor')" class="mt-3 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Create Post
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recentPosts.map(post => `
+                <div class="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                        <h4 class="font-medium text-gray-800 truncate">${post.title}</h4>
+                        <div class="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                            <span class="px-2 py-1 rounded-full text-xs ${getStatusColor(post.status)}">${post.status}</span>
+                            <span>${new Date(post.createdAt).toLocaleDateString()}</span>
+                            ${post.status === 'published' ? `<span><i class="ri-eye-line mr-1"></i>${post.views || 0}</span>` : ''}
+                        </div>
+                    </div>
+                    <button onclick="editPost(${post.id})" class="text-blue-600 hover:text-blue-700">
+                        <i class="ri-edit-line"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderMyPosts() {
+            const searchTerm = document.getElementById('searchMyPosts')?.value.toLowerCase() || '';
+            const statusFilter = document.getElementById('filterStatus')?.value || 'all';
+            const sortBy = document.getElementById('sortMyPosts')?.value || 'newest';
+            
+            let filteredPosts = blogPosts.filter(post => {
+                const matchesSearch = post.title.toLowerCase().includes(searchTerm) ||
+                                    post.content.toLowerCase().includes(searchTerm) ||
+                                    post.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                
+                const matchesStatus = statusFilter === 'all' || post.status === statusFilter;
+                
+                return matchesSearch && matchesStatus;
+            });
+
+            // Sort posts
+            filteredPosts.sort((a, b) => {
+                switch(sortBy) {
+                    case 'oldest':
+                        return new Date(a.createdAt) - new Date(b.createdAt);
+                    case 'popular':
+                        return (b.views || 0) - (a.views || 0);
+                    default: // newest
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                }
+            });
+
+            const container = document.getElementById('myPostsGrid');
+            
+            if (filteredPosts.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <i class="ri-file-text-line text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-600 mb-2">No posts found</h3>
+                        <p class="text-gray-500">Start creating your first blog post!</p>
+                        <button onclick="showSection('editor')" class="mt-4 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                            Create New Post
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filteredPosts.map(post => `
+                <article class="blog-post bg-white rounded-xl shadow-lg overflow-hidden">
+                    ${post.featuredImage ? `
+                        <img src="${post.featuredImage}" alt="${post.title}" class="w-full h-48 object-cover" onerror="this.style.display='none'">
+                    ` : `
+                        <div class="w-full h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                            <i class="ri-file-text-line text-4xl text-white"></i>
+                        </div>
+                    `}
+                    
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-${getCategoryColor(post.category)}-100 text-${getCategoryColor(post.category)}-800 px-2 py-1 rounded-full text-sm font-medium">
+                                ${post.category}
+                            </span>
+                            <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(post.status)}">
+                                ${post.status.charAt(0).toUpperCase() + post.status.slice(1)}
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-xl font-bold text-gray-800 mb-2 line-clamp-2">${post.title}</h3>
+                        
+                        <div class="text-gray-600 text-sm mb-4 line-clamp-3">
+                            ${stripHtml(post.content).substring(0, 150)}${stripHtml(post.content).length > 150 ? '...' : ''}
+                        </div>
+                        
+                        ${post.tags.length > 0 ? `
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                ${post.tags.slice(0, 3).map(tag => `<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">#${tag}</span>`).join('')}
+                                ${post.tags.length > 3 ? `<span class="text-gray-500 text-xs">+${post.tags.length - 3} more</span>` : ''}
+                            </div>
+                        ` : ''}
+                        
+                        <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
+                            <span>${new Date(post.createdAt).toLocaleDateString()}</span>
+                            ${post.status === 'published' ? `
+                                <div class="flex items-center space-x-4">
+                                    <span><i class="ri-eye-line mr-1"></i>${post.views || 0}</span>
+                                    <span><i class="ri-heart-line mr-1"></i>${post.likes || 0}</span>
+                                    <span><i class="ri-chat-3-line mr-1"></i>${post.comments || 0}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <button onclick="editPost(${post.id})" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm">
+                                <i class="ri-edit-line mr-1"></i>Edit
+                            </button>
+                            <button onclick="duplicatePost(${post.id})" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm">
+                                <i class="ri-file-copy-line"></i>
+                            </button>
+                            <button onclick="deletePost(${post.id})" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm">
+                                <i class="ri-delete-bin-line"></i>
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function updateAnalytics() {
+            const publishedPosts = blogPosts.filter(post => post.status === 'published');
+            
+            if (publishedPosts.length === 0) {
+                document.getElementById('avgViews').textContent = '0';
+                document.getElementById('engagementRate').textContent = '0%';
+                document.getElementById('popularCategory').textContent = '-';
+                document.getElementById('topPostsList').innerHTML = '<p class="text-gray-500">No published posts yet.</p>';
+                return;
+            }
+            
+            // Calculate average views
+            const totalViews = publishedPosts.reduce((sum, post) => sum + (post.views || 0), 0);
+            const avgViews = Math.round(totalViews / publishedPosts.length);
+            document.getElementById('avgViews').textContent = avgViews.toLocaleString();
+            
+            // Calculate engagement rate
+            const totalLikes = publishedPosts.reduce((sum, post) => sum + (post.likes || 0), 0);
+            const totalComments = publishedPosts.reduce((sum, post) => sum + (post.comments || 0), 0);
+            const engagementRate = totalViews > 0 ? Math.round(((totalLikes + totalComments) / totalViews) * 100) : 0;
+            document.getElementById('engagementRate').textContent = engagementRate + '%';
+            
+            // Find most popular category
+            const categoryStats = {};
+            publishedPosts.forEach(post => {
+                categoryStats[post.category] = (categoryStats[post.category] || 0) + (post.views || 0);
+            });
+            const popularCategory = Object.keys(categoryStats).reduce((a, b) => categoryStats[a] > categoryStats[b] ? a : b, '-');
+            document.getElementById('popularCategory').textContent = popularCategory.charAt(0).toUpperCase() + popularCategory.slice(1);
+            
+            // Top performing posts
+            const topPosts = publishedPosts
+                .sort((a, b) => (b.views || 0) - (a.views || 0))
+                .slice(0, 5);
+            
+            document.getElementById('topPostsList').innerHTML = topPosts.map(post => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex-1">
+                        <h4 class="font-medium text-gray-800 truncate">${post.title}</h4>
+                        <div class="flex items-center space-x-4 text-sm text-gray-500 mt-1">
+                            <span><i class="ri-eye-line mr-1"></i>${post.views || 0}</span>
+                            <span><i class="ri-heart-line mr-1"></i>${post.likes || 0}</span>
+                        </div>
+                    </div>
+                    <button onclick="editPost(${post.id})" class="text-blue-600 hover:text-blue-700">
+                        <i class="ri-edit-line"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // Rich Text Editor Functions
+        function formatText(command, value = null) {
+            document.execCommand(command, false, value);
+            document.getElementById('editorContent').focus();
+            updateFormatButtons();
+        }
+
+        function changeFontSize(size) {
+            formatText('fontSize', size);
+        }
+
+        function insertImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = `<img src="${e.target.result}" alt="Uploaded image" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;">`;
+                    document.execCommand('insertHTML', false, img);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function insertLink() {
+            const url = prompt('Enter the URL:');
+            if (url) {
+                const text = window.getSelection().toString() || prompt('Enter link text:') || url;
+                const link = `<a href="${url}" target="_blank" style="color: #3b82f6; text-decoration: underline;">${text}</a>`;
+                document.execCommand('insertHTML', false, link);
+            }
+        }
+
+        function updateFormatButtons() {
+            const commands = ['bold', 'italic', 'underline'];
+            commands.forEach(command => {
+                const button = document.querySelector(`button[onclick="formatText('${command}')"]`);
+                if (button) {
+                    if (document.queryCommandState(command)) {
+                        button.classList.add('active-format');
+                    } else {
+                        button.classList.remove('active-format');
+                    }
+                }
+            });
+        }
+
+        // Post Management Functions
+        function saveDraft() {
+            const post = gatherPostData();
+            post.status = 'draft';
+            savePost(post);
+            showNotification('Draft saved successfully!', 'success');
+        }
+
+        function publishPost() {
+            const post = gatherPostData();
+            
+            if (!post.title.trim()) {
+                showNotification('Please enter a post title', 'error');
+                return;
+            }
+            
+            if (!post.content.trim()) {
+                showNotification('Please enter post content', 'error');
+                return;
+            }
+            
+            post.status = 'published';
+            post.publishedAt = new Date().toISOString();
+            
+            // Generate realistic engagement metrics
+            if (!currentEditingPost) {
+                post.views = 0;
+                post.likes = 0;
+                post.comments = 0;
+            }
+            
+            savePost(post);
+            showNotification('Post published successfully!', 'success');
+            
+            clearEditor();
+            showSection('dashboard');
+        }
+
+        function gatherPostData() {
+            return {
+                id: currentEditingPost ? currentEditingPost.id : Date.now(),
+                title: document.getElementById('postTitle').value,
+                content: document.getElementById('editorContent').innerHTML,
+                category: document.getElementById('postCategory').value,
+                tags: document.getElementById('postTags').value.split(',').map(tag => tag.trim()).filter(tag => tag),
+                status: document.getElementById('postStatus').value,
+                featuredImage: document.getElementById('featuredImage').value,
+                createdAt: currentEditingPost ? currentEditingPost.createdAt : new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                views: currentEditingPost ? currentEditingPost.views : 0,
+                likes: currentEditingPost ? currentEditingPost.likes : 0,
+                comments: currentEditingPost ? currentEditingPost.comments : 0,
+                authorId: currentUser.id
+            };
+        }
+
+        function savePost(post) {
+            const existingIndex = blogPosts.findIndex(p => p.id === post.id);
+            
+            if (existingIndex !== -1) {
+                blogPosts[existingIndex] = post;
+            } else {
+                blogPosts.unshift(post);
+            }
+            
+            saveUserData();
+            updateDashboardStats();
+            updateSidebarStats();
+        }
+
+        function clearEditor() {
+            document.getElementById('postTitle').value = '';
+            document.getElementById('editorContent').innerHTML = '';
+            document.getElementById('postTags').value = '';
+            document.getElementById('featuredImage').value = '';
+            document.getElementById('postCategory').selectedIndex = 0;
+            document.getElementById('postStatus').selectedIndex = 0;
+            document.getElementById('editorTitle').textContent = 'Create New Post';
+            currentEditingPost = null;
+        }
+
+        function cancelEdit() {
+            if (currentEditingPost || document.getElementById('postTitle').value || document.getElementById('editorContent').innerHTML) {
+                if (confirm('Are you sure you want to cancel? Any unsaved changes will be lost.')) {
+                    clearEditor();
+                    showSection('dashboard');
+                }
+            } else {
+                showSection('dashboard');
+            }
+        }
+
+        function editPost(postId) {
+            const post = blogPosts.find(p => p.id === postId);
+            if (!post) return;
+            
+            currentEditingPost = post;
+            
+            document.getElementById('postTitle').value = post.title;
+            document.getElementById('editorContent').innerHTML = post.content;
+            document.getElementById('postCategory').value = post.category;
+            document.getElementById('postTags').value = post.tags.join(', ');
+            document.getElementById('postStatus').value = post.status;
+            document.getElementById('featuredImage').value = post.featuredImage || '';
+            document.getElementById('editorTitle').textContent = 'Edit Post';
+            
+            showSection('editor');
+        }
+
+        function duplicatePost(postId) {
+            const post = blogPosts.find(p => p.id === postId);
+            if (!post) return;
+            
+            const duplicatedPost = {
+                ...post,
+                id: Date.now(),
+                title: post.title + ' (Copy)',
+                status: 'draft',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                views: 0,
+                likes: 0,
+                comments: 0
+            };
+            
+            blogPosts.unshift(duplicatedPost);
+            saveUserData();
+            renderMyPosts();
+            updateDashboardStats();
+            updateSidebarStats();
+            showNotification('Post duplicated successfully!', 'success');
+        }
+
+        function deletePost(postId) {
+            if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+                blogPosts = blogPosts.filter(p => p.id !== postId);
+                saveUserData();
+                renderMyPosts();
+                updateDashboardStats();
+                updateSidebarStats();
+                showNotification('Post deleted successfully!', 'success');
+            }
+        }
+
+        function previewPost() {
+            const post = gatherPostData();
+            
+            if (!post.title.trim()) {
+                showNotification('Please enter a post title to preview', 'error');
+                return;
+            }
+            
+            const previewHTML = `
+                <article class="max-w-none">
+                    <header class="mb-6">
+                        ${post.featuredImage ? `<img src="${post.featuredImage}" alt="${post.title}" class="w-full h-64 object-cover rounded-lg mb-4" onerror="this.style.display='none'">` : ''}
+                        <h1 class="text-3xl font-bold text-gray-800 mb-2">${post.title}</h1>
+                        <div class="flex items-center text-sm text-gray-600 mb-4">
+                            <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full mr-3">${post.category}</span>
+                            <span>By ${currentUser.name}</span>
+                            <span class="mx-2">•</span>
+                            <span>${new Date().toLocaleDateString()}</span>
+                        </div>
+                        ${post.tags.length > 0 ? `
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                ${post.tags.map(tag => `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-sm">#${tag}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </header>
+                    <div class="prose max-w-none">
+                        ${post.content || '<p class="text-gray-500 italic">No content yet...</p>'}
+                    </div>
+                </article>
+            `;
+            
+            document.getElementById('previewContent').innerHTML = previewHTML;
+            document.getElementById('previewModal').classList.remove('hidden');
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').classList.add('hidden');
+        }
+
+        // Profile Functions
+        function saveProfile(event) {
+            event.preventDefault();
+            
+            const updatedUser = {
+                ...currentUser,
+                name: document.getElementById('profileName').value,
+                email: document.getElementById('profileEmail').value,
+                bio: document.getElementById('profileBio').value,
+                website: document.getElementById('profileWebsite').value,
+                location: document.getElementById('profileLocation').value,
+                twitter: document.getElementById('profileTwitter').value,
+                linkedin: document.getElementById('profileLinkedin').value,
+                github: document.getElementById('profileGithub').value
+            };
+            
+            // Update current user
+            currentUser = updatedUser;
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            
+            // Update in users array
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            const userIndex = users.findIndex(u => u.id === currentUser.id);
+            if (userIndex !== -1) {
+                users[userIndex] = updatedUser;
+                localStorage.setItem('users', JSON.stringify(users));
+            }
+            
+            // Update UI
+            document.getElementById('userNameDisplay').textContent = updatedUser.name;
+            document.getElementById('dashboardUserName').textContent = updatedUser.name.split(' ')[0];
+            
+            showNotification('Profile updated successfully!', 'success');
+        }
+
+        // Settings Functions
+        function confirmDeleteAccount() {
+            if (confirm('Are you sure you want to delete your account? This action cannot be undone and will permanently delete all your posts and data.')) {
+                if (confirm('This is your final warning. Are you absolutely sure you want to delete your account?')) {
+                    // Remove user data
+                    localStorage.removeItem('currentUser');
+                    localStorage.removeItem(`posts_${currentUser.id}`);
+                    
+                    // Remove from users array
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const filteredUsers = users.filter(u => u.id !== currentUser.id);
+                    localStorage.setItem('users', JSON.stringify(filteredUsers));
+                    
+                    showNotification('Account deleted successfully', 'success');
+                    showLoginScreen();
+                }
+            }
+        }
+
+        // Utility Functions
+        function getCategoryColor(category) {
+            const colors = {
+                technology: 'blue',
+                lifestyle: 'green',
+                travel: 'purple',
+                food: 'orange',
+                business: 'indigo',
+                health: 'pink'
+            };
+            return colors[category] || 'gray';
+        }
+
+        function getStatusColor(status) {
+            const colors = {
+                draft: 'bg-gray-100 text-gray-800',
+                published: 'bg-green-100 text-green-800',
+                scheduled: 'bg-blue-100 text-blue-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        function stripHtml(html) {
+            const tmp = document.createElement('div');
+            tmp.innerHTML = html;
+            return tmp.textContent || tmp.innerText || '';
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'error' ? 'bg-red-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="ri-${type === 'success' ? 'check-circle-line' : type === 'error' ? 'error-warning-line' : 'information-line'} mr-2"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('previewModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closePreview();
+            }
+        });
+
+        // Handle responsive sidebar
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 768) {
+                document.getElementById('sidebar').classList.remove('hidden-mobile');
+                sidebarVisible = true;
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9744c36446403b7f',t:'MTc1NjA1ODU3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
