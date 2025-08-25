@@ -21,7 +21,7 @@ app.use('/api/posts', postRoutes);
 app.use('/api/users', userRoutes);
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/blogcraft', {
+mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
